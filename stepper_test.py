@@ -1,34 +1,33 @@
-from stepper_motors_juanmf1 import (GenericStepper, DRV8825MotorDriver, ExponentialAcceleration, DynamicDelayPlanner, DynamicNaviation)
-from time import sleep
+"""
+Stepper motor control example using a A4988 carrier board 
+"""
+import pyb
 
-class StepperMotor:
+dir_pin = pyb.Pin(31, pyb.Pin.OUT_PP)
+step_pin = pyb.Pin(29, pyb.Pin.OUT_PP)
+# enable_pin =pyb.Pin('Y3', pyb.Pin.OUT_PP)
 
-  def __init__(self):
-    self.motor = StepperMotor.setupDriver(directionGpioPin=31, stepGpioPin=29)
-    self.motorPosition = 0
+# enable_pin.high()  # high is stop
+dir_pin.high()     # high is CCW looking down on shaft
 
-    self.move(motorDelta=100)
-    sleep(0.05)
+# enable_pin.low()
+for i in range(1000):
+        step_pin.high()
+        pyb.udelay(2)
+        step_pin.low()
+        pyb.udelay(1000)
 
-    # While still moving, send contradictory order to arm. It should gracefully
-    # stop and speed back up in opposite direction
-    self.move(motorDelta=-100)
+dir_pin.low()
 
-  def motorPositionListener(self, currentPosition, targetPosition, direction):
-    self.motorPosition = currentPosition
+for i in range(1000):
+        step_pin.high()
+        pyb.udelay(2)
+        step_pin.low()
+        pyb.udelay(1000)
 
-  def move(self, motorDelta):
-    if motorDelta != 0:
-      if motorDelta > 0:
-        self.motor.stepClockwise(motorDelta, self.motorPositionListener)
-      else:
-        self.motor.stepCounterClockwise(motorDelta, self.motorPositionListener)
+# enable_pin.high()
 
-  @staticmethod
-  def setupDriver(*, directionGpioPin, stepGpioPin):
-    stepperMotor = GenericStepper(maxPps=1500, minPps=150) #chatgpt math said 1500 for safe value, 150 from example
-    delayPlanner = DynamicDelayPlanner()
-    navigation = DynamicNavigation()
-
-    acceleration = ExponentialAcceleration(stepperMotor, delayPlanner)
-    return DRV8825MotorDriver(stepperMotor, acceleration, directionGpioPin, stepGpioPin, navigation)
+#Brake motor draws full current
+# enable_pin.low()
+pyb.delay(5000)
+# enable_pin.high()
