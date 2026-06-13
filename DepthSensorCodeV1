@@ -1,7 +1,17 @@
 import time
 
 def read_depth(sensor):
-	if not sensor.read():
-		return None, None
-	return sensor.depth(.998), sensor.pressure ()
-	print(f"Depth: {depth_m:.3f} m   Pressure: {pres:.1f} mbar")
+    # Trigger a new I2C read; returns True on success
+    if not sensor.read():
+        return None, None
+    # You can either use sensor.depth() (which applies default density)
+    # or compute depth from an adjusted pressure:
+    return sensor.depth(), sensor.pressure()
+
+  # 3) Calibrate zero at the surface:
+    time.sleep(1)              # let sensor stabilize
+    if not sensor.read():
+        raise RuntimeError("Failed to read for zero-offset")
+    surface_pressure = sensor.pressure()
+
+    print(f"Zero-surface pressure = {surface_pressure:.1f} mbar")
