@@ -53,13 +53,14 @@ try:
             print(f"Pressure: {adj_pressure:.3f} mbar")    # pressure just from water
             print(f"Depth: {depth_m:.3f} m")       # accounts for atm pressure
 
-        else:
-            print("I²C read failure")
-
-     with open(csv_data, mode='a', newline='') as csv_file:
+         with open(csv_data, mode='a', newline='') as csv_file:
             writer = csv.writer(csv_file)
             writer.writerow([timestamp, round(depth_m, 3), round(pressure, 2), round(temperature, 2)])
 
+        else:
+            print("I²C read failure")
+
         time.sleep(0.5)  # Wait 0.5 seconds before next reading
+
 except KeyboardInterrupt:
     print("Measurement stopped.")
