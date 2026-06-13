@@ -1,5 +1,13 @@
 import time
 import ms5837
+import csv
+from datetime import datetime
+
+csv_data = "Float_Depth_Log.csv"
+
+with open(csv_data, mode='w', newline='') as csv_file:
+    writer = csv.writer(csv_file)
+    writer.writerow(["Timestamp", "Depth (m)", "Pressure (Pa)", "Temperature (C)"])
 
 def read_depth(sensor):
     # Trigger a new I2C read; returns True on success
@@ -37,14 +45,20 @@ try:
         Fluid_p = 997        # fluid density in kg/m^3
 
         if sensor.read():
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             adj_pressure = sensor.pressure() - surface_pressure
             depth_m = (adj_pressure * 100) / (Fluid_p * 9.80665)    # 9.80665 is standard gravity
 
+            print(f"{timestamp}")    # time
             print(f"Pressure: {adj_pressure:.3f} mbar")    # pressure just from water
             print(f"Depth: {depth_m:.3f} m")       # accounts for atm pressure
 
         else:
             print("I²C read failure")
+
+ with open(csv_data, mode='a', newline='') as csv_file:
+                writer = csv.writer(csv_file)
+                writer.writerow([timestamp, round(depth_m, 3), round(pressure, 2), round(temperature, 2)])
 
         time.sleep(0.5)  # Wait 0.5 seconds before next reading
 except KeyboardInterrupt:
