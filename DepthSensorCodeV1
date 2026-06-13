@@ -31,8 +31,7 @@ if __name__ == "__main__":
 
 # Start reading depth in water
     time.sleep(5)               # give time to put sensor in water
-    if not sensor.read():
-        raise RuntimeError("Failed to read fluid pressure")
+    if sensor.read():
         adj_pressure = sensor.pressure() - surface_pressure
         depth_m = sensor.depth(adj_pressure)
 
