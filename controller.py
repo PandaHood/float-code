@@ -46,7 +46,6 @@ class FloatController():
     def __init__(self):
         self.ser = None
         self.sensor = None
-        self.surface_p = None
         self.log_writer = None
         self.log_buffer = []
         self.last_log_time = 0.0
@@ -88,7 +87,9 @@ class FloatController():
         if t - self.last_log_time >= LOG_INTERVAL_S:
             pkt = f"{COMPANY_ID} {self.utc_datetime_formatted()} {self.pressure_pa()/1000:.2f} kPa {depth_m:.3f} m"
             self.log_buffer.append(pkt)
-            self.log_writer.writerow([self.utc_datetime_formatted(), round(depth_m, 3), round(self.pressure_pa(), 2)])
+            self.log_writer.writerow([COMPANY_ID, self.utc_datetime_formatted(), round(depth_m, 3), round(self.pressure_pa(), 2)])
+            with open("depth_log.txt", "a") as f:
+                f.write(pkt + "\n")
             print(pkt)
             self.last_log_time = t
 
@@ -238,6 +239,15 @@ class FloatController():
         self.send_cmd("S")
         print("SUCCESS: Fully positive; float at surface.")
 
+    def test_logging(self):
+        start_time = time.monotonic()
+        while time.monotonic() - start_time < 120:
+            time.sleep(CONTROL_STEP_S)
+            depth = self.read_depth()
+            if depth is None:
+                continue
+            self.log_packet(depth)
+
 
     def main(self):
         self.sensor = ms5837.MS5837_02BA()
@@ -258,24 +268,25 @@ class FloatController():
         deep_bb_target = DEEP_SENSOR_TARGET_M
         shallow_bb_target = SHALLOW_SENSOR_TARGET_M
 
-        self.send_cmd("E")
+        # self.send_cmd("E")
 
         with open(LOG_FILE_PATH, mode='w', newline='') as csv_file:
             self.log_writer = csv.writer(csv_file)
-            self.log_writer.writerow(["Timestamp (UTC)", "Depth (m)", "Pressure (Pa)"])
+            self.log_writer.writerow(["Company ID", "Timestamp (UTC)", "Depth (m)", "Pressure (Pa)"])
 
             states = [
-                ("return_surface", lambda: self.return_to_surface()),
-                ("submerge", lambda: self.submerge()),
+                # ("return_surface", lambda: self.return_to_surface()),
+                # ("submerge", lambda: self.submerge()),
                 # ("sink_deep", lambda: self.sink(deep_bb_target)),
-                ("bang_bang_deep", lambda: self.bang_bang(deep_bb_target, CONTROL_STEP_S)),
+                # ("bang_bang_deep", lambda: self.bang_bang(deep_bb_target, CONTROL_STEP_S)),
                 # ("ascend_shallow", lambda: self.ascend(shallow_bb_target)),
-                ("bang_bang_shallow_1", lambda: self.bang_bang(shallow_bb_target, CONTROL_STEP_S)),
+                # ("bang_bang_shallow_1", lambda: self.bang_bang(shallow_bb_target, CONTROL_STEP_S)),
                 # ("sink_deep_2", lambda: self.sink(deep_bb_target)),
-                ("bang_bang_deep_2", lambda: self.bang_bang(deep_bb_target, CONTROL_STEP_S)),
+                # ("bang_bang_deep_2", lambda: self.bang_bang(deep_bb_target, CONTROL_STEP_S)),
                 # ("ascend_shallow_2", lambda: self.ascend(shallow_bb_target)),
-                ("bang_bang_shallow_2", lambda: self.bang_bang(shallow_bb_target, CONTROL_STEP_S)),
-                ("return_surface", lambda: self.return_to_surface()),
+                # ("bang_bang_shallow_2", lambda: self.bang_bang(shallow_bb_target, CONTROL_STEP_S)),
+                # ("return_surface", lambda: self.return_to_surface()),
+                ("test_logging", lambda: self.test_logging()),
             ]
 
             for _, fn in states:
