@@ -268,25 +268,26 @@ class FloatController():
         deep_bb_target = DEEP_SENSOR_TARGET_M
         shallow_bb_target = SHALLOW_SENSOR_TARGET_M
 
-        # self.send_cmd("E")
+        self.send_cmd("E")
+        self.send_cmd("S")
 
         with open(LOG_FILE_PATH, mode='w', newline='') as csv_file:
             self.log_writer = csv.writer(csv_file)
             self.log_writer.writerow(["Company ID", "Timestamp (UTC)", "Depth (m)", "Pressure (Pa)"])
 
             states = [
-                # ("return_surface", lambda: self.return_to_surface()),
-                # ("submerge", lambda: self.submerge()),
+                ("return_surface", lambda: self.return_to_surface()),
+                ("submerge", lambda: self.submerge()),
                 # ("sink_deep", lambda: self.sink(deep_bb_target)),
-                # ("bang_bang_deep", lambda: self.bang_bang(deep_bb_target, CONTROL_STEP_S)),
+                ("bang_bang_deep", lambda: self.bang_bang(deep_bb_target, CONTROL_STEP_S)),
                 # ("ascend_shallow", lambda: self.ascend(shallow_bb_target)),
-                # ("bang_bang_shallow_1", lambda: self.bang_bang(shallow_bb_target, CONTROL_STEP_S)),
+                ("bang_bang_shallow_1", lambda: self.bang_bang(shallow_bb_target, CONTROL_STEP_S)),
                 # ("sink_deep_2", lambda: self.sink(deep_bb_target)),
-                # ("bang_bang_deep_2", lambda: self.bang_bang(deep_bb_target, CONTROL_STEP_S)),
+                ("bang_bang_deep_2", lambda: self.bang_bang(deep_bb_target, CONTROL_STEP_S)),
                 # ("ascend_shallow_2", lambda: self.ascend(shallow_bb_target)),
-                # ("bang_bang_shallow_2", lambda: self.bang_bang(shallow_bb_target, CONTROL_STEP_S)),
-                # ("return_surface", lambda: self.return_to_surface()),
-                ("test_logging", lambda: self.test_logging()),
+                ("bang_bang_shallow_2", lambda: self.bang_bang(shallow_bb_target, CONTROL_STEP_S)),
+                ("return_surface", lambda: self.return_to_surface()),
+                # ("test_logging", lambda: self.test_logging()),
             ]
 
             for _, fn in states:
