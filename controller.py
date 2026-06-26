@@ -33,6 +33,7 @@ HOLD_DURATION_S = 30.0
 VELOCITY_DEADBAND = 0.005
 BANG_BANG_ALPHA = 0.7
 MAX_VELOCITY = 0.03
+TIMEOUT_S = 14.0 * 60.0
 
 DEEP_TARGET_M = 2.50
 SHALLOW_TARGET_M = 0.40
@@ -49,6 +50,7 @@ class FloatController():
         self.log_writer = None
         self.log_buffer = []
         self.last_log_time = 0.0
+        self.start_time = time.monotonic()
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(POSITIVE_LIMIT_PIN,  GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -167,6 +169,8 @@ class FloatController():
         velocity = 0.0
 
         while True:
+            if time.monotonic() - self.start_time >= TIMEOUT_S:
+                return
             raw = self.read_depth()
             if raw is None:
                 continue
@@ -250,6 +254,7 @@ class FloatController():
 
 
     def main(self):
+        self.start_time = time.monotonic()
         self.sensor = ms5837.MS5837_02BA()
         if not self.sensor.init():
             raise RuntimeError("Sensor init failed")
