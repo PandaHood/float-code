@@ -24,3 +24,17 @@ def read_light(sensor):
     except OSError:
         return None
     return ((data[0] << 8) | data[1]) / 1.2
+
+if __name__ == "__main__":
+    sensor = init()
+    print("Light sensor working - Ctrl+C to stop")
+    try:
+        while True:
+            lux = read_light(sensor)
+            if lux is None:
+                print("Read failed - check wiring")
+            else:
+                print(f"{lux:.1f} lx")
+            time.sleep(0.5)
+    except KeyboardInterrupt:
+        sensor.close()
