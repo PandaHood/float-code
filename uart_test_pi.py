@@ -2,7 +2,7 @@
 import serial
 import time
 
-PORT      = "/dev/ttyS0"
+PORT      = "/dev/ttyAMA0"
 BAUD_RATE = 9600
 
 if __name__ == '__main__':
